@@ -31,6 +31,8 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
     public static final String DIGITRANSIT_BASE_URL = "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
+    public static final int AFTERNOON = 2;
+    public static final int MORNING = 1;
     RequestQueue myRequestQueue;
     int requestsInQueue = 0;
     List<MyLeg> first = new ArrayList<>();
@@ -68,12 +70,12 @@ public class MainActivity extends AppCompatActivity {
         c.setTime(now);
         int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
 
-        if (hourOfDay > 12) {
-            mode = 1;
+        if (hourOfDay > 11) {
+            mode = AFTERNOON;
             makeRequest(DIGITRANSIT_BASE_URL, R.raw.ilkhki, first);
             makeRequest(DIGITRANSIT_BASE_URL, R.raw.hkipla, second);
         } else {
-            mode = 2;
+            mode = MORNING;
             makeRequest(DIGITRANSIT_BASE_URL, R.raw.plahki, first);
             makeRequest(DIGITRANSIT_BASE_URL, R.raw.hkiilk, second);
         }
@@ -86,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private void printResults() {
         TextView results = (TextView) findViewById(R.id.textView2);
         results.setText("");
-        if (mode == 1) {
+        if (mode == MORNING) {
             results.append("PLA - HKI:\n");
         } else {
             results.append("ILK - HKI:\n");
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView results2 = (TextView) findViewById(R.id.textView3);
         results2.setText("");
-        if (mode == 1) {
+        if (mode == MORNING) {
             results2.append("HKI - ILK:\n");
         } else {
             results2.append("HKI - PLA:\n");
