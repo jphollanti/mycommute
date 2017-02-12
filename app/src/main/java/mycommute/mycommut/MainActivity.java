@@ -58,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
         first.clear();
         second.clear();
 
+        TextView res1 = (TextView) findViewById(R.id.textView2);
+        res1.setText(" ... ");
+        TextView res2 = (TextView) findViewById(R.id.textView3);
+        res2.setText(" ... ");
+
         Date now = new Date();
         Calendar c = GregorianCalendar.getInstance();
         c.setTime(now);
