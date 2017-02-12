@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
         private final List<MyLeg> results;
 
-        public ResponseListener(List<MyLeg> results) {
+        ResponseListener(List<MyLeg> results) {
             super();
             this.results = results;
         }
@@ -203,15 +203,15 @@ public class MainActivity extends AppCompatActivity {
             this.end = end;
         }
 
-        public Date getEnd() {
+        Date getEnd() {
             return end;
         }
 
-        public Date getStart() {
+        Date getStart() {
             return start;
         }
 
-        public String getCode() {
+        String getCode() {
             return code;
         }
     }
