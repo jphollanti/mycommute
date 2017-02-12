@@ -30,7 +30,7 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String DIGITRANSIT_GRAPHQL = "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
+    public static final String DIGITRANSIT_BASE_URL = "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
     RequestQueue myRequestQueue;
     int requestsInQueu = 0;
     List<MyLeg> first = new ArrayList<>();
@@ -70,12 +70,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (hourOfDay > 12) {
             mode = 1;
-            makeRequest(DIGITRANSIT_GRAPHQL, R.raw.ilkhki, first);
-            makeRequest(DIGITRANSIT_GRAPHQL, R.raw.hkipla, second);
+            makeRequest(DIGITRANSIT_BASE_URL, R.raw.ilkhki, first);
+            makeRequest(DIGITRANSIT_BASE_URL, R.raw.hkipla, second);
         } else {
             mode = 2;
-            makeRequest(DIGITRANSIT_GRAPHQL, R.raw.plahki, first);
-            makeRequest(DIGITRANSIT_GRAPHQL, R.raw.hkiilk, second);
+            makeRequest(DIGITRANSIT_BASE_URL, R.raw.plahki, first);
+            makeRequest(DIGITRANSIT_BASE_URL, R.raw.hkiilk, second);
         }
 
         TextView refreshTxt = (TextView) findViewById(R.id.textView);
