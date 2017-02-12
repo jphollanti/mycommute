@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String DIGITRANSIT_BASE_URL = "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
     RequestQueue myRequestQueue;
-    int requestsInQueu = 0;
+    int requestsInQueue = 0;
     List<MyLeg> first = new ArrayList<>();
     List<MyLeg> second = new ArrayList<>();
     int mode = 1;
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeRequest(final String url, final int planId, List<MyLeg> results) {
-        requestsInQueu++;
+        requestsInQueue++;
         StringRequest r = new StringRequest(Request.Method.POST, url, new ResponseListener(results), new ErrorListener()) {
 
             @Override
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onResponse(String response) {
-            requestsInQueu--;
+            requestsInQueue--;
             try {
                 JSONObject obj = new JSONObject(response);
                 JSONArray a = obj.getJSONObject("data").getJSONObject("plan").getJSONArray("itineraries");
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
-            if (requestsInQueu == 0) {
+            if (requestsInQueue == 0) {
                 printResults();
             }
         }
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
     private class ErrorListener implements Response.ErrorListener{
         public void onErrorResponse(VolleyError error) {
-            requestsInQueu--;
+            requestsInQueue--;
             error.printStackTrace();
         }
     }
