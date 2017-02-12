@@ -1,7 +1,7 @@
 {
   plan(
-    from: {lat: 60.17135144, lon: 24.940157286}
-    to: {lat: 60.15265122, lon: 24.88013404}
+    from: {lat: 60.15265122, lon: 24.88013404}
+    to: {lat: 60.17135144, lon: 24.940157286}
     numItineraries: 10
     modes: "WALK,RAIL,BUS"
     date: "%s"

@@ -2,10 +2,10 @@
   plan(
     from: {lat: 60.27562294, lon: 25.03515346}
     to: {lat: 60.17127673, lon: 24.94086845}
-    numItineraries: 5
+    numItineraries: 10
     modes: "WALK,RAIL,BUS"
-    date: "2017-02-11"
-    time: "17:00:00"
+    date: "%s"
+    time: "%s"
   ) {
     itineraries {
       legs {

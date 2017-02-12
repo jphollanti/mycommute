@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -21,7 +22,9 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     int requestsInQueu = 0;
     List<MyLeg> first = new ArrayList<>();
     List<MyLeg> second = new ArrayList<>();
+    int mode = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +57,49 @@ public class MainActivity extends AppCompatActivity {
     public void refresh() {
         first.clear();
         second.clear();
-        makeRequest(DIGITRANSIT_GRAPHQL, R.raw.plahki);
+
+        Date now = new Date();
+        Calendar c = GregorianCalendar.getInstance();
+        c.setTime(now);
+        int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
+
+        if (hourOfDay > 12) {
+            mode = 1;
+            makeRequest(DIGITRANSIT_GRAPHQL, R.raw.ilkhki, first);
+            makeRequest(DIGITRANSIT_GRAPHQL, R.raw.hkipla, second);
+        } else {
+            mode = 2;
+            makeRequest(DIGITRANSIT_GRAPHQL, R.raw.plahki, first);
+            makeRequest(DIGITRANSIT_GRAPHQL, R.raw.hkiilk, second);
+        }
+
+        TextView refreshTxt = (TextView) findViewById(R.id.textView);
+        now = new Date();
+        refreshTxt.setText(DateFormat.format("HH:mm:ss", now));
     }
 
     private void printResults() {
+        TextView results = (TextView) findViewById(R.id.textView2);
+        results.setText("");
+        if (mode == 1) {
+            results.append("PLA - HKI:\n");
+        } else {
+            results.append("ILK - HKI:\n");
+        }
+
         for (MyLeg l : first) {
-            System.out.println(format(l.getStart()) + " - " + format(l.getEnd()) + " / " +l.getCode());
+            results.append(format(l.getStart()) + " - " + format(l.getEnd()) + " / " +l.getCode() + "\n");
+        }
+
+        TextView results2 = (TextView) findViewById(R.id.textView3);
+        results2.setText("");
+        if (mode == 1) {
+            results2.append("HKI - ILK:\n");
+        } else {
+            results2.append("HKI - PLA:\n");
+        }
+        for (MyLeg l : second) {
+            results2.append(format(l.getStart()) + " - " + format(l.getEnd()) + " / " +l.getCode() + "\n");
         }
     }
 
@@ -66,9 +107,9 @@ public class MainActivity extends AppCompatActivity {
         return DateFormat.format("hh:mm", date);
     }
 
-    private void makeRequest(final String url, final int planId) {
+    private void makeRequest(final String url, final int planId, List<MyLeg> results) {
         requestsInQueu++;
-        StringRequest r = new StringRequest(Request.Method.POST, url, new ResponseListener(), new ErrorListener()) {
+        StringRequest r = new StringRequest(Request.Method.POST, url, new ResponseListener(results), new ErrorListener()) {
 
             @Override
             public String getBodyContentType() {
@@ -82,7 +123,11 @@ public class MainActivity extends AppCompatActivity {
                     InputStream in_s = res.openRawResource(planId);
                     byte[] b = new byte[in_s.available()];
                     in_s.read(b);
-                    return b;
+                    String s = new String(b);
+
+                    Date _15minago = new Date(new Date().getTime()- 900000);
+                    String ss = String.format(s, DateFormat.format("yyyy-MM-dd", _15minago), DateFormat.format("HH:mm:ss", _15minago));
+                    return ss.getBytes();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -92,6 +137,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class ResponseListener implements Response.Listener<String> {
+
+        private final List<MyLeg> results;
+
+        public ResponseListener(List<MyLeg> results) {
+            super();
+            this.results = results;
+        }
+
         @Override
         public void onResponse(String response) {
             requestsInQueu--;
@@ -113,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                         System.err.println("No suitable leg found");
                         continue;
                     }
-                    first.add(new MyLeg(
+                    results.add(new MyLeg(
                             leg.getJSONObject("route").getString("shortName"),
                             new Date(leg.getLong("startTime")),
                             new Date(leg.getLong("endTime"))));
