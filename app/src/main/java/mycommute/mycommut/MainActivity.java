@@ -2,6 +2,7 @@ package mycommute.mycommut;
 
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         for (MyLeg l : first) {
-            results.append(format(l.getStart()) + " - " + format(l.getEnd()) + " / " +l.getCode() + "\n");
+            results.append(getResultLine(l));
         }
 
         TextView results2 = (TextView) findViewById(R.id.textView3);
@@ -107,12 +108,17 @@ public class MainActivity extends AppCompatActivity {
             results2.append("HKI - PLA:\n");
         }
         for (MyLeg l : second) {
-            results2.append(format(l.getStart()) + " - " + format(l.getEnd()) + " / " +l.getCode() + "\n");
+            results2.append(getResultLine(l));
         }
     }
 
+    @NonNull
+    private String getResultLine(MyLeg l) {
+        return DateFormat.format("HH:mm", l.getStart()) + " - " + DateFormat.format("mm", l.getEnd()) + " / " +l.getCode() + "\n";
+    }
+
     private CharSequence format(Date date) {
-        return DateFormat.format("hh:mm", date);
+        return DateFormat.format("HH:mm", date);
     }
 
     private void makeRequest(final String url, final int planId, List<MyLeg> results) {
