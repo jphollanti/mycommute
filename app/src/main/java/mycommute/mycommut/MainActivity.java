@@ -3,6 +3,7 @@ package mycommute.mycommut;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
@@ -158,25 +159,26 @@ public class MainActivity extends AppCompatActivity {
             try {
                 JSONObject obj = new JSONObject(response);
                 JSONArray a = obj.getJSONObject("data").getJSONObject("plan").getJSONArray("itineraries");
-                JSONObject leg = null;
                 for (int i=0; i<a.length(); i++) {
                     JSONObject lso = a.getJSONObject(i);
                     JSONArray ls = lso.getJSONArray("legs");
+                    List<JSONObject> legs = new ArrayList<>();
                     for (int j=0; j<ls.length(); j++) {
                         JSONObject l = ls.getJSONObject(j);
                         if (l.has("mode") && !Objects.equals(l.getString("mode"), "WALK")) {
-                            leg = l;
-                            break ;
+                            legs.add(l);
                         }
                     }
-                    if (leg == null) {
-                        System.err.println("No suitable leg found");
-                        continue;
+                    Date start = new Date(legs.get(0).getLong("startTime"));
+                    Date end = new Date(legs.get(legs.size()-1).getLong("endTime"));
+                    List<String> codes = new ArrayList<>();
+                    for (JSONObject leg : legs) {
+                        codes.add(leg.getJSONObject("route").getString("shortName"));
                     }
                     results.add(new MyLeg(
-                            leg.getJSONObject("route").getString("shortName"),
-                            new Date(leg.getLong("startTime")),
-                            new Date(leg.getLong("endTime"))));
+                            TextUtils.join("-",codes),
+                            start,
+                            end));
                 }
             } catch (JSONException e) {
                 throw new RuntimeException(e);
