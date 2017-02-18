@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -27,10 +28,21 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final Map<String, Pair<String, String>> places;
+
+    static {
+        places = new HashMap<>();
+        places.put("pla", new Pair<>("60.27562294", "25.03515346"));
+        places.put("hki", new Pair<>("60.17127673", "24.94086845"));
+        places.put("ilk", new Pair<>("60.15265122", "24.88013404"));
+    }
 
     public static final String DIGITRANSIT_BASE_URL = "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
     public static final int AFTERNOON = 2;
@@ -74,12 +86,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (hourOfDay > 11) {
             mode = AFTERNOON;
-            makeRequest(DIGITRANSIT_BASE_URL, R.raw.ilkhki, first);
-            makeRequest(DIGITRANSIT_BASE_URL, R.raw.hkipla, second);
+            makeRequest(DIGITRANSIT_BASE_URL, places.get("ilk"), places.get("hki"), first);
+            makeRequest(DIGITRANSIT_BASE_URL, places.get("hki"), places.get("pla"), second);
         } else {
             mode = MORNING;
-            makeRequest(DIGITRANSIT_BASE_URL, R.raw.plahki, first);
-            makeRequest(DIGITRANSIT_BASE_URL, R.raw.hkiilk, second);
+            makeRequest(DIGITRANSIT_BASE_URL, places.get("pla"), places.get("hki"), first);
+            makeRequest(DIGITRANSIT_BASE_URL, places.get("hki"), places.get("ilk"), second);
         }
 
         TextView refreshTxt = (TextView) findViewById(R.id.textView);
@@ -117,11 +129,7 @@ public class MainActivity extends AppCompatActivity {
         return DateFormat.format("HH:mm", l.getStart()) + " - " + DateFormat.format("mm", l.getEnd()) + " / " +l.getCode() + "\n";
     }
 
-    private CharSequence format(Date date) {
-        return DateFormat.format("HH:mm", date);
-    }
-
-    private void makeRequest(final String url, final int planId, List<MyLeg> results) {
+    private void makeRequest(final String url, final Pair<String, String> from, final Pair<String, String> to, List<MyLeg> results) {
         requestsInQueue++;
         StringRequest r = new StringRequest(Request.Method.POST, url, new ResponseListener(results), new ErrorListener()) {
 
@@ -134,13 +142,16 @@ public class MainActivity extends AppCompatActivity {
             public byte[] getBody() throws AuthFailureError {
                 try {
                     Resources res = getResources();
-                    InputStream in_s = res.openRawResource(planId);
+                    InputStream in_s = res.openRawResource(R.raw.fromto);
                     byte[] b = new byte[in_s.available()];
                     in_s.read(b);
                     String s = new String(b);
 
                     Date _15minago = new Date(new Date().getTime()- 900000);
-                    String ss = String.format(s, DateFormat.format("yyyy-MM-dd", _15minago), DateFormat.format("HH:mm:ss", _15minago));
+                    String ss = String.format(s,
+                            from.first, from.second,
+                            to.first, to.second,
+                            DateFormat.format("yyyy-MM-dd", _15minago), DateFormat.format("HH:mm:ss", _15minago));
                     return ss.getBytes();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
