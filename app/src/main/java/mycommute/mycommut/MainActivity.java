@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int MORNING = 1;
     RequestQueue myRequestQueue;
     int requestsInQueue = 0;
+    final Object requestsInQueueLock = new Object;
     List<MyLeg> first = new ArrayList<>();
     List<MyLeg> second = new ArrayList<>();
     int mode = 1;
@@ -71,6 +72,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void refresh() {
+        synchronized (requestsInQueueLock) {
+            if (requestsInQueue > 0) {
+                // already ongoing refresh
+                return;
+            }
+        }
         first.clear();
         second.clear();
 
@@ -130,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeRequest(final String url, final Pair<String, String> from, final Pair<String, String> to, List<MyLeg> results) {
-        requestsInQueue++;
         StringRequest r = new StringRequest(Request.Method.POST, url, new ResponseListener(results), new ErrorListener()) {
 
             @Override
@@ -159,6 +165,9 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         myRequestQueue.add(r);
+        synchronized (requestsInQueueLock) {
+            requestsInQueue++;
+        }
     }
 
     private class ResponseListener implements Response.Listener<String> {
@@ -172,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onResponse(String response) {
-            requestsInQueue--;
             try {
                 JSONObject obj = new JSONObject(response);
                 JSONArray a = obj.getJSONObject("data").getJSONObject("plan").getJSONArray("itineraries");
@@ -199,16 +207,22 @@ public class MainActivity extends AppCompatActivity {
                 }
             } catch (JSONException e) {
                 throw new RuntimeException(e);
-            }
-            if (requestsInQueue == 0) {
-                printResults();
+            } finally {
+                synchronized (requestsInQueueLock) {
+                    requestsInQueue--;
+                    if (requestsInQueue == 0) {
+                        printResults();
+                    }
+                }
             }
         }
     }
 
     private class ErrorListener implements Response.ErrorListener{
         public void onErrorResponse(VolleyError error) {
-            requestsInQueue--;
+            synchronized (requestsInQueueLock) {
+                requestsInQueue--;
+            }
             error.printStackTrace();
         }
     }
