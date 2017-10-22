@@ -41,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
         places = new HashMap<>();
         places.put("pla", new Pair<>("60.27562294", "25.03515346"));
         places.put("hki", new Pair<>("60.17127673", "24.94086845"));
-        places.put("ilk", new Pair<>("60.15265122", "24.88013404"));
+        //places.put("ilk", new Pair<>("60.15265122", "24.88013404"));
+        places.put("ilk", new Pair<>("60.153329", "24.885273"));
     }
 
     public static final String DIGITRANSIT_BASE_URL = "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
