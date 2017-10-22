@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int MORNING = 1;
     RequestQueue myRequestQueue;
     int requestsInQueue = 0;
-    final Object requestsInQueueLock = new Object;
+    final Object requestsInQueueLock = new Object();
     List<MyLeg> first = new ArrayList<>();
     List<MyLeg> second = new ArrayList<>();
     int mode = 1;
